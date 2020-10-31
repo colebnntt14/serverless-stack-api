@@ -8,16 +8,21 @@ plugins:
   - serverless-bundle # Package our functions with Webpack
   - serverless-offline
   - serverless-dotenv-plugin # Load .env as environment variables
+# Create our resources with separate CloudFormation templates
 
+resources:
+  # API Gateway Errors
+  - ${file(resources/api-gateway-errors.yml)}
+  
 provider:
   name: aws
   runtime: nodejs12.x
   stage: prod
-  region: us-east-2
+  region: us-east-1
 
   # These environment variables are made available to our functions
   # under process.env.
-  environment: 
+  environment:
     tableName: notes
     stripeSecretKey: ${env:STRIPE_SECRET_KEY}
 
@@ -33,7 +38,7 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
         - dynamodb:DescribeTable
-      Resource: "arn:aws:dynamodb:us-east-2:*:*"
+      Resource: "arn:aws:dynamodb:us-east-1:*:*"
 
 functions:
   # Defines an HTTP API endpoint that calls the main function in create.js
@@ -51,7 +56,7 @@ functions:
           cors: true
           authorizer: aws_iam
 
-          
+
   get:
     # Defines an HTTP API endpoint that calls the main function in get.js
     # - path: url path is /notes/{id}
@@ -62,10 +67,7 @@ functions:
           path: notes/{id}
           method: get
           cors: true
-          authorizer: aws_iam            
-
-
-
+          authorizer: aws_iam
 
   list:
     # Defines an HTTP API endpoint that calls the main function in list.js
@@ -78,7 +80,6 @@ functions:
           method: get
           cors: true
           authorizer: aws_iam
-  
 
   update:
     # Defines an HTTP API endpoint that calls the main function in update.js
@@ -90,7 +91,7 @@ functions:
           path: notes/{id}
           method: put
           cors: true
-          authorizer: aws_iam 
+          authorizer: aws_iam
 
 
   delete:
@@ -104,9 +105,6 @@ functions:
           method: delete
           cors: true
           authorizer: aws_iam
-
-
-
 
 
   billing:
@@ -123,7 +121,4 @@ functions:
 
 
 
-# Create our resources with separate CloudFormation templates
-resources:
-  # API Gateway Errors
-  - ${file(resources/api-gateway-errors.yml)}
+
